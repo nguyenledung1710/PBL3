@@ -20,7 +20,7 @@ public class UserService {
         this.usersDAO = new UsersDAOImp();
     }
     
-    // Lấy người dùng theo email (chỉ đọc)
+    
     public Users getUserByEmail(String email) {
         return usersDAO.getUserByEmai(email);
     }
@@ -59,5 +59,16 @@ public class UserService {
     public boolean verifyCodeWithUser(int userID, String code) {
         return usersDAO.verifyCodeWithUser(userID, code);
     }
+    public void deleteUser(int userId) {
+        if (userId <= 0) {
+            throw new IllegalArgumentException("User ID phải lớn hơn 0");
+        }
+        usersDAO.deleteUser(userId);
+    }
+    public void UpdateUser(Users user){
+        usersDAO.updateUser(user);
+    }
+    
+    
     
 }

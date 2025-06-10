@@ -21,6 +21,13 @@ public class songDAO {
         }
         return list;
     }
+    
+      public boolean deleteById(int id) throws SQLException {
+        String sql = "DELETE FROM songs WHERE id = ?";
+        int rows = DBHelper.getInstance().executeUpdate(sql, id);
+        return rows > 0;
+    }
+    
     public static void insertSong(int userId, String title, String path) {
         String sql = "INSERT INTO songs(user_id, title, file_path) VALUES(?, ?, ?)";
         try {

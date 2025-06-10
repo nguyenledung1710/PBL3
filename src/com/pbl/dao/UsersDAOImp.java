@@ -47,7 +47,7 @@ public class UsersDAOImp implements UsersDAO {
                     user.getPassword(),
                     user.getSalt(),
                     0,
-                    user.getRole(), 
+                    user.getRole(),
                     code);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -63,7 +63,7 @@ public class UsersDAOImp implements UsersDAO {
         u.setSalt(rs.getString("salt"));
         u.setStatus(rs.getBoolean("status"));
         u.setRole(rs.getString("role"));
-        u.setVerifyCode(rs.getString("verifyCode")); 
+        u.setVerifyCode(rs.getString("verifyCode"));
         return u;
     }
 
@@ -155,4 +155,48 @@ public class UsersDAOImp implements UsersDAO {
         }
         return false;
     }
+
+    @Override
+    public void deleteUser(int userId) {
+        String sql = "DELETE FROM users WHERE user_id = ?";
+        try {
+            dbHelper.executeUpdate(sql, userId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // bạn có thể ném ra một exception custom ở đây nếu muốn
+        }
+    }
+
+    @Override
+    public void updateUser(Users user) {
+        String sql = "UPDATE users "
+                + "SET username    = ?, "
+                + "    email       = ?, "
+                + "    password    = ?, "
+                + "    salt        = ?, "
+                + "    status      = ?, "
+                + "    role        = ?, "
+                + "    verifyCode  = ?, "
+                + "    updated_at  = NOW() "
+                + "WHERE user_id = ? LIMIT 1";
+        try {
+           
+            String code = user.getVerifyCode();
+            if (code == null || code.trim().isEmpty()) {
+                code = "";
+            }
+            dbHelper.executeUpdate(sql,
+                    user.getUsername(),
+                    user.getEmail(),
+                    user.getPassword(),
+                    user.getSalt(),
+                    user.isStatus() ? 1 : 0,
+                    user.getRole(),
+                    code,
+                    user.getUser_id());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

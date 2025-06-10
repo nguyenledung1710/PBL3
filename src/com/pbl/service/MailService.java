@@ -4,7 +4,7 @@
  */
 package com.pbl.service;
 
-import com.pbl.model.ModelMessage;
+
 import java.util.Properties;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -13,6 +13,8 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+
+import com.pbl.model.ModelMessage;
 
 /**
  *
@@ -40,6 +42,7 @@ public class MailService {
             message.setFrom(new InternetAddress(from));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(toEmail));
             message.setSubject("Verify Code");
+            System.err.println("Thanh Cong");
             message.setText(code);
             Transport.send(message);
             ms.setSuccess(true);

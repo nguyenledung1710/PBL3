@@ -1,7 +1,7 @@
 
 package com.pbl.dao;
 
-import com.pbl.form.Clockk;
+import com.pbl.form.Clock;
 import com.pbl.model.Track;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,17 +26,13 @@ public class TrackDAO {
         return list;
     }
 
-//    public static byte[] getTrackData(int id) {
-//         String sql =
-//            "SELECT data FROM songs WHERE id=? " +
-//            "UNION ALL " +
-//            "SELECT data FROM ringstones WHERE id=?";
-//        try(ResultSet rs =
-//                DBHelper.getInstance().getRecords(sql, id, id)){
-//            if(rs.next()) return rs.getBytes(1);
-//        }catch(Exception e){ e.printStackTrace(); }
-//        return null;
-//    }
+        public boolean deleteById(int id) throws SQLException {
+        String sql = "DELETE FROM tracks WHERE id = ?";
+        int rows = DBHelper.getInstance().executeUpdate(sql, id);
+        return rows > 0;
+    }
+    
+      
    public static void insertTrack(int userId, String title, String filePath) {
         String sql = "INSERT INTO tracks(user_id, title, file_path) VALUES(?, ?, ?)";
         try {

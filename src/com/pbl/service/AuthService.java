@@ -52,7 +52,7 @@ public class AuthService {
          System.out.println(userDAO.getUserByEmai(email).getVerifyCode());
          sendMain(userDAO.getUserByEmai(email));
     }
-      private void sendMain(Users user) {
+      public void sendMain(Users user) {
         new Thread(new Runnable() {
             @Override
             public void run() {
