@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.pbl.model;
 
 import java.time.LocalDate;
@@ -9,11 +6,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * @author Audreen Soh
- * <p>
- * This class implements Task object
- */
+
 public class Task {
     private int ID;
     private int userId;   
@@ -22,7 +15,8 @@ public class Task {
     private String category;
     private boolean isDone;
     private LocalDateTime dateTime;
-
+    private int upcomingNotificationSentCount; 
+    
     /**
      * Class constructor.
      *
@@ -178,4 +172,11 @@ public class Task {
         this.isDone = isDone;
     }
     
+     public int getUpcomingNotificationSentCount() {
+        return upcomingNotificationSentCount;
+    }
+
+    public void setUpcomingNotificationSentCount(int upcomingNotificationSentCount) {
+        this.upcomingNotificationSentCount = upcomingNotificationSentCount;
+    }
 }
