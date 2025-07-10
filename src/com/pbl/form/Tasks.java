@@ -12,6 +12,7 @@ import java.util.List;
 public class Tasks extends JPanel {
 
     private TaskService taskService; // Sử dụng lớp nghiệp vụ TaskService
+    private int userId;              // ID của người dùng hiện hành
 
     /**
      * Class constructor.
@@ -19,8 +20,12 @@ public class Tasks extends JPanel {
      * @param date      The date of the tasks.
      * @param mainForm  The main form object.
      * @param mainPanel The parent panel object.
+     * @param userId    ID của người dùng đang đăng nhập
      */
-    public Tasks(LocalDate date, MainForm mainForm, JPanel mainPanel) {
+    public Tasks(LocalDate date, MainForm mainForm, JPanel mainPanel, int userId) {
+        // Lưu userId
+        this.userId = userId;
+        
         // Set up tasks panel
         setPreferredSize(new Dimension(400, 400));
         setLayout(new BorderLayout(10, 10));
@@ -44,8 +49,8 @@ public class Tasks extends JPanel {
     private void createTasksSection(LocalDate date, MainForm mainForm, JPanel mainPanel) {
         String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-       
-        List<Task> tasks = taskService.getTasksByDate(formattedDate);
+        // Lấy danh sách task theo ngày và userId
+        List<Task> tasks = taskService.getTasksByDate(formattedDate, userId);
 
         int rows = Math.max(4, tasks.size() + 1);
         JPanel list = new JPanel(new GridLayout(rows, 1, 10, 5));
@@ -108,8 +113,8 @@ public class Tasks extends JPanel {
         newTaskButton.setForeground(Color.WHITE);
         newTaskButton.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         newTaskButton.addActionListener(e -> {
-            // Mở TaskEditor để thêm task mới
-            new TaskEditor(new Task(date), mainForm, mainPanel);
+          
+            new TaskEditor(new Task(userId, date), mainForm, mainPanel);
         });
         add(newTaskButton, BorderLayout.SOUTH);
     }

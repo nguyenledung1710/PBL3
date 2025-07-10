@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.pbl.model;
 
 import java.time.LocalDate;
@@ -9,19 +6,17 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * @author Audreen Soh
- * <p>
- * This class implements Task object
- */
+
 public class Task {
     private int ID;
+    private int userId;   
     private String title;
     private String description;
     private String category;
     private boolean isDone;
     private LocalDateTime dateTime;
-
+    private int upcomingNotificationSentCount; 
+    
     /**
      * Class constructor.
      *
@@ -47,7 +42,8 @@ public class Task {
      *
      * @param date The date of the task
      */
-    public Task(LocalDate date) {
+    public Task(int userID,LocalDate date) {
+        this.userId = userID;
         this.dateTime = LocalDateTime.of(date, LocalTime.now());
     }
 
@@ -158,5 +154,29 @@ public class Task {
     LocalTime newLocalTime = LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm"));
     this.dateTime = LocalDateTime.of(oldDate, newLocalTime);
       
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public boolean isIsDone() {
+        return isDone;
+    }
+
+    public void setIsDone(boolean isDone) {
+        this.isDone = isDone;
+    }
+    
+     public int getUpcomingNotificationSentCount() {
+        return upcomingNotificationSentCount;
+    }
+
+    public void setUpcomingNotificationSentCount(int upcomingNotificationSentCount) {
+        this.upcomingNotificationSentCount = upcomingNotificationSentCount;
     }
 }

@@ -5,12 +5,11 @@ import com.pbl.component.Menu;
 import com.pbl.component.ThoiKhoaBieu;
 import com.pbl.event.EventMenuSelected;
 import com.pbl.event.EventShowPopupMenu;
-import com.pbl.form.Clock;
+import com.pbl.form.Clockk;
 import com.pbl.form.Form1;
 import com.pbl.form.Form2;
 import com.pbl.form.Form_Home;
 import com.pbl.form.MainForm;
-
 import com.pbl.swing.MenuItem;
 import com.pbl.swing.PopupMenu;
 
@@ -52,15 +51,20 @@ public class Main extends javax.swing.JFrame {
                         main.showForm(new Form_Home());
                     } else if (subMenuIndex == 1) {
                          LocalDate today = LocalDate.now();
-                        main.showForm(new Form2(main,today));
+                             int userId = 1;
+                        main.showForm(new Form2(main,today, userId));
                     } else if(subMenuIndex == 2){
                         main.showForm(new Form1());
                     } else if(subMenuIndex == 3){
                         main.showForm(new ThoiKhoaBieu());
+
                     }
                     else if(subMenuIndex == 4){
-                        main.showForm(new Clock());
+                        main.showForm(new Clockk());
                     }
+
+                    } 
+
                 }
             }
         });
@@ -158,38 +162,7 @@ public class Main extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new Main().setVisible(true);
-            }
-        });
-    }
+   
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLayeredPane bg;

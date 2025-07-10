@@ -26,10 +26,12 @@ import javax.swing.Timer;
 
 public class Calendar extends JPanel {
 
-    private MainForm mainForm;  // Biến lưu MainForm
-
-    public Calendar(int year, int month, LocalDate selectedDay, MainForm mainForm, JPanel parentPanel) {
+    private MainForm mainForm; 
+    private int userId;        
+    // Sửa constructor để nhận thêm userId
+    public Calendar(int year, int month, LocalDate selectedDay, MainForm mainForm, JPanel parentPanel, int userId) {
         this.mainForm = mainForm;
+        this.userId = userId;
 
         setPreferredSize(new Dimension(380, 380));
         setLayout(new BorderLayout());
@@ -48,39 +50,35 @@ public class Calendar extends JPanel {
         dateLabel.setForeground(Color.decode("#c1380a"));
         top.add(dateLabel, BorderLayout.CENTER);
 
-        // Mũi tên trái
         JLabel left = new JLabel(new ImageIcon(getClass().getResource("/com/pbl/icon/arrow-left.png")));
         left.setCursor(new Cursor(Cursor.HAND_CURSOR));
         left.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                parentPanel.removeAll();
                 if (month != 1) {
-                    resetMainPanel(parentPanel, selectedDay, new Calendar(year, month - 1, selectedDay, mainForm, parentPanel));
+                    resetMainPanel(parentPanel, selectedDay, new Calendar(year, month - 1, selectedDay, mainForm, parentPanel, userId));
                 } else {
-                    resetMainPanel(parentPanel, selectedDay, new Calendar(year - 1, 12, selectedDay, mainForm, parentPanel));
+                    resetMainPanel(parentPanel, selectedDay, new Calendar(year - 1, 12, selectedDay, mainForm, parentPanel, userId));
                 }
             }
         });
         top.add(left, BorderLayout.WEST);
 
-      
         JLabel right = new JLabel(new ImageIcon(getClass().getResource("/com/pbl/icon/arrow-right.png")));
         right.setCursor(new Cursor(Cursor.HAND_CURSOR));
         right.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (month != 12) {
-                    resetMainPanel(parentPanel, selectedDay, new Calendar(year, month + 1, selectedDay, mainForm, parentPanel));
+                    resetMainPanel(parentPanel, selectedDay, new Calendar(year, month + 1, selectedDay, mainForm, parentPanel, userId));
                 } else {
-                    resetMainPanel(parentPanel, selectedDay, new Calendar(year + 1, 1, selectedDay, mainForm, parentPanel));
+                    resetMainPanel(parentPanel, selectedDay, new Calendar(year + 1, 1, selectedDay, mainForm, parentPanel, userId));
                 }
             }
         });
         top.add(right, BorderLayout.EAST);
         add(top, BorderLayout.NORTH);
 
-        // Panel ngày: 7x7 grid
         JPanel days = new JPanel(new GridLayout(7, 7));
         days.setBackground(null);
 
@@ -109,7 +107,8 @@ public class Calendar extends JPanel {
             final int day = i;
             LocalDate currentDay = LocalDate.of(year, month, i);
             String formattedDay = currentDay.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            boolean hasTasks = taskService.hasTaskOnDate(formattedDay);
+            // Sửa: truyền userId khi gọi hasTaskOnDate
+            boolean hasTasks = taskService.hasTaskOnDate(formattedDay, userId);
             Color bgColor = Color.decode("#e3deca");
             Color textColor = Color.BLACK;
             if (hasTasks) {
@@ -134,7 +133,7 @@ public class Calendar extends JPanel {
                         if (parentPanel instanceof Form2) {
                             ((Form2) parentPanel).updateTasks(selected);
                         }
-                        DaySchedule daySchedule = new DaySchedule(mainForm, selected);
+                        DaySchedule daySchedule = new DaySchedule(mainForm, selected, userId);
                         parentPanel.add(daySchedule, new GridBagConstraints());
                         parentPanel.revalidate();
                         parentPanel.repaint();
@@ -171,7 +170,7 @@ public class Calendar extends JPanel {
         }
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx = 0;
-        constraints.gridy = 1; 
+        constraints.gridy = 1;
         constraints.weightx = 1;
         constraints.weighty = 1;
         constraints.fill = GridBagConstraints.BOTH;

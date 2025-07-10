@@ -13,15 +13,8 @@ public class DayScheduleTasks extends JPanel {
 
     private TaskService taskService;
 
-    /**
-     * Constructor của DayScheduleTasks.
-     *
-     * @param date        Ngày được chọn.
-     * @param frame       Đối tượng MainForm.
-     * @param parentPanel Panel cha chứa giao diện.
-     */
-    public DayScheduleTasks(LocalDate date, MainForm frame, JPanel parentPanel) {
-
+    // Thêm tham số userId để xác định các task của user hiện hành
+    public DayScheduleTasks(LocalDate date, MainForm frame, JPanel parentPanel, int userId) {
         // Khởi tạo service
         taskService = new TaskService();
 
@@ -30,10 +23,10 @@ public class DayScheduleTasks extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
 
-        // Lấy dữ liệu task từ DB thông qua TaskService
+        // Lấy dữ liệu task từ DB thông qua TaskService, truyền thêm userId
         DateTimeFormatter dbDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedDate = date.format(dbDateFormatter);
-        List<Task> tasks = taskService.getTasksByDate(formattedDate);
+        List<Task> tasks = taskService.getTasksByDate(formattedDate, userId);
 
         // ================= Header Panel =================
         JPanel topPanel = new JPanel(new BorderLayout());
@@ -44,24 +37,24 @@ public class DayScheduleTasks extends JPanel {
         tasksLabel.setFont(new Font("Helvetica", Font.BOLD, 25));
         topPanel.add(tasksLabel, BorderLayout.WEST);
 
-        // Nút Add để mở TaskEditor (bỏ comment nếu cần)
-        JLabel addButton = new JLabel(new ImageIcon("resources/add.png"));
+        // Nút Add để mở TaskEditor để thêm task mới
+        JLabel addButton = new JLabel(new ImageIcon(getClass().getResource("/com/pbl/icon/add.png")));
         addButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         addButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                // Mở TaskEditor để thêm task mới
-                new TaskEditor(new Task(date), frame, parentPanel);
+                // Khi tạo task mới, khởi tạo Task với userId và ngày hiện hành
+                new TaskEditor(new Task(userId, date), frame, parentPanel);
             }
         });
         topPanel.add(addButton, BorderLayout.EAST);
         add(topPanel, BorderLayout.NORTH);
 
         // ================= Bảng hiển thị tasks =================
-        // Tính số hàng: 1 cho header + số dòng task (ít nhất 5 dòng cho kích thước mặc định)
+        // Số hàng: 1 header + số dòng task (ít nhất 6 dòng)
         int rows = Math.max(6, tasks.size() + 1);
 
-        // Tạo panel chứa danh sách task với lưới 5 cột
+        // Panel chứa danh sách task với lưới 5 cột
         JPanel list = new JPanel(new GridLayout(rows, 5, 2, 2));
         list.setBackground(Color.WHITE);
 
@@ -77,7 +70,6 @@ public class DayScheduleTasks extends JPanel {
         header.add(createHeaderLabel("Done"));
         list.add(header);
 
-        
         for (int i = 0; i < tasks.size(); i++) {
             final int j = i;
             JPanel taskPanel = new JPanel(new GridLayout(1, 5));
@@ -87,14 +79,11 @@ public class DayScheduleTasks extends JPanel {
             taskPanel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                 
                     new TaskEditor(tasks.get(j), frame, parentPanel);
                 }
             });
 
-            
             taskPanel.add(createBodyLabel(Integer.toString(i + 1), "#000000"));
-           
             taskPanel.add(createBodyLabel(tasks.get(i).getTimeToString(), "#000000"));
             // Cột thứ 3: Task title
             taskPanel.add(createBodyLabel(tasks.get(i).getTitle(), "#000000"));
@@ -102,24 +91,22 @@ public class DayScheduleTasks extends JPanel {
             taskPanel.add(createBodyLabel(tasks.get(i).getCategory(), getTaskColor(tasks.get(i).getCategory())));
             // Cột thứ 5: Checkbox Done
             JCheckBox doneCheck = new JCheckBox();
-           Icon notSelected = new ImageIcon(getClass().getResource("/com/pbl/icon/check-box-not-selected.png"));
+            Icon notSelected = new ImageIcon(getClass().getResource("/com/pbl/icon/check-box-not-selected.png"));
             Icon selected = new ImageIcon(getClass().getResource("/com/pbl/icon/check-box-selected.png"));
             doneCheck.setBorder(BorderFactory.createEmptyBorder(0, 66, 0, 0));
             doneCheck.setIcon(notSelected);
             doneCheck.setSelectedIcon(selected);
             doneCheck.setSelected(tasks.get(i).isDone());
-            
             doneCheck.addItemListener(e -> {
                 Task t = tasks.get(j);
                 t.setDone(doneCheck.isSelected());
-                taskService.updateTask(t); // cập nhật trạng thái trong DB
+                taskService.updateTask(t); // Cập nhật trạng thái trong DB
             });
             taskPanel.add(doneCheck);
 
             list.add(taskPanel);
         }
 
-        
         JScrollPane scrollPane = new JScrollPane(list);
         add(scrollPane, BorderLayout.CENTER);
     }
@@ -146,7 +133,6 @@ public class DayScheduleTasks extends JPanel {
         return label;
     }
 
-  
     private String getTaskColor(String category) {
         switch (category) {
             case "General":
