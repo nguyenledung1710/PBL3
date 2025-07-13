@@ -1,17 +1,56 @@
 package com.pbl.form;
 
 import com.pbl.component.Form;
+import com.pbl.dao.NotificationDaoImpl;
 import com.pbl.event.EventColorChange;
+import com.pbl.model.Notification;
+import com.pbl.model.Users;
 import com.pbl.properties.SystemProperties;
 import com.pbl.service.EmailConfig;
 import com.pbl.swing.EventSwitchSelected;
 import com.pbl.theme.ThemeColorChange;
 import java.awt.Color;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.AbstractSpinnerModel;
+import javax.swing.SpinnerListModel;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 
 public class Setting_Form extends Form {
 
-    public Setting_Form() {
+    private  Notification notification;
+    private int usID;
+    private NotificationDaoImpl notificationDaoImpl;
+    private EmailConfig ec = null;
+    public Setting_Form(int UserID) throws SQLException {
         initComponents();
+        usID = UserID;
+        notificationDaoImpl = new NotificationDaoImpl();
+        Notification notification = notificationDaoImpl.getNotificationsByUserId(UserID);
+        if(notification != null ){
+            SpinnerNumberModel spinnerModel = new SpinnerNumberModel(notification.getNotificationTime(), 0, 59, 1);
+            Spinner_Time.setModel(spinnerModel);
+            
+            Combobox_Time.setSelectedItem(notification.getNotificationTimeText());
+            
+            boolean iteamExists = false;
+            for(int i = 0 ; i < Combobox_Time.getItemCount(); i++){
+                if(Combobox_Time.getItemAt(i).equals(notification.getNotificationTimeText())){
+                    iteamExists = true;
+                    break;
+                }
+            }
+            if(iteamExists){
+                Combobox_Time.setSelectedItem(notification.getNotificationTimeText());
+            }
+        }
+   
+        ec.setMinutesToNotify(getSelectedTime());
+        ec.setText(getSelectedCombobox());
         ThemeColorChange.getInstance().addEventColorChange(new EventColorChange() {
             @Override
             public void colorChange(Color color) {
@@ -62,8 +101,7 @@ public class Setting_Form extends Form {
         }
         return null; // Hoặc trả về giá trị mặc định, hoặc ném lỗi
     }
-
-
+    
     public int getSelectedTime() {
         Object value = Spinner_Time.getValue();
         if (value instanceof Integer) {
@@ -263,9 +301,22 @@ public class Setting_Form extends Form {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btn_SaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_SaveActionPerformed
-      EmailConfig ec = null;
-      ec.setMinutesToNotify(getSelectedTime());
-      ec.setText(getSelectedCombobox());
+        try {
+       
+            ec.setMinutesToNotify(getSelectedTime());
+            ec.setText(getSelectedCombobox());
+            notification = new Notification(usID, getSelectedTime(), getSelectedCombobox());
+            if(notificationDaoImpl.doesUserHaveNotifications(notification.getUserId()))
+            {
+                System.out.println("Update");
+                notificationDaoImpl.updateNotification(notification);
+            }else{
+                  notificationDaoImpl.addNotification(notification);
+            }
+          
+        } catch (SQLException ex) {
+            Logger.getLogger(Setting_Form.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_btn_SaveActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

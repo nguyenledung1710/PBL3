@@ -2,13 +2,16 @@ package com.pbl.swing;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.Icon;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.RoundRectangle2D;
 import javax.swing.JButton;
 import javax.swing.border.EmptyBorder;
 import org.jdesktop.animation.timing.Animator;
@@ -17,44 +20,35 @@ import org.jdesktop.animation.timing.TimingTargetAdapter;
 
 public class MenuButton extends JButton {
 
-    public int getIndex() {
-        return index;
+    public String getIcoName() {
+        return icoName;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
+    public void setIcoName(String icoName) {
+        this.icoName = icoName;
     }
 
-    private int index;
+    public Color getEffectColor() {
+        return effectColor;
+    }
+
+    public void setEffectColor(Color effectColor) {
+        this.effectColor = effectColor;
+    }
+
+    private String icoName;
     private Animator animator;
     private int targetSize;
     private float animatSize;
     private Point pressedPoint;
     private float alpha;
-    private Color effectColor = new Color(255, 255, 255, 150);
+    private Color effectColor = new Color(173, 173, 173);
 
-    public MenuButton(Icon icon, String text) {
-        super(text);
-        setIcon(icon);
-        init();
-        setBorder(new EmptyBorder(1, 20, 1, 1));
-    }
-
-    public MenuButton(String text) {
-        super(text);
-        init();
-        setBorder(new EmptyBorder(1, 50, 1, 1));
-    }
-
-    public MenuButton(String text, boolean subMenu) {
-        super(text);
-        init();
-    }
-
-    private void init() {
+    public MenuButton() {
         setContentAreaFilled(false);
-        setForeground(new Color(255, 255, 255));
-        setHorizontalAlignment(JButton.LEFT);
+        setBorder(new EmptyBorder(5, 10, 5, 10));
+        setBackground(Color.WHITE);
+        setCursor(new Cursor(Cursor.HAND_CURSOR));
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent me) {
@@ -86,12 +80,25 @@ public class MenuButton extends JButton {
     protected void paintComponent(Graphics grphcs) {
         Graphics2D g2 = (Graphics2D) grphcs;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(getBackground());
         if (pressedPoint != null) {
+            Area area = createShape();
             g2.setColor(effectColor);
-            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
-            g2.fillOval((int) (pressedPoint.x - animatSize / 2), (int) (pressedPoint.y - animatSize / 2), (int) animatSize, (int) animatSize);
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, alpha));
+            area.intersect(new Area(new Ellipse2D.Double((pressedPoint.x - animatSize / 2), (pressedPoint.y - animatSize / 2), animatSize, animatSize)));
+            g2.fill(area);
         }
         g2.setComposite(AlphaComposite.SrcOver);
         super.paintComponent(grphcs);
+    }
+
+    private Area createShape() {
+        int width = getWidth();
+        int height = getHeight();
+        int r = 20;
+        Area area = new Area(new RoundRectangle2D.Float(0, 0, width, height, r, r));
+        area.add(new Area(new RoundRectangle2D.Float(width - r, 0, r, r, 5, 5)));
+        area.add(new Area(new RoundRectangle2D.Float(0, height - r, r, r, 5, 5)));
+        return area;
     }
 }

@@ -7,14 +7,18 @@ package com.pbl.main;
 
 import com.pbl.component.Login;
 import com.pbl.component.PanelVerifyCode;
+import com.pbl.component.PanelVerifyGmail;
 import com.pbl.component.Register;
+import com.pbl.component.SetNewPassword;
 import com.pbl.dao.UsersDAO;
 import com.pbl.dao.UsersDAOImp;
-import com.pbl.form.Form2;
+
 import com.pbl.form.MainForm;
 import com.pbl.model.Users;
 import com.pbl.service.AuthService;
+import com.pbl.service.EmailNotificationService;
 import com.pbl.service.UserService;
+import com.pbl.utility.PasswordUtils;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,6 +27,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -36,8 +42,13 @@ public class LoginFrame extends javax.swing.JFrame {
     private Register register;
     private Login login;
     private PanelVerifyCode verify;
+    private PanelVerifyGmail verifyGm;
+    private SetNewPassword setPass;
     private UsersDAO userDAO;
     private UserService userService;
+    private boolean isForget;
+    private Users ForgotUser;
+    private AuthService athService;
 
     public LoginFrame() {
         initComponents();
@@ -45,28 +56,45 @@ public class LoginFrame extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         userDAO = new UsersDAOImp();
         userService = new UserService();
-         verify = new PanelVerifyCode();
+        verify = new PanelVerifyCode();
+        verifyGm = new PanelVerifyGmail();
+        athService = new AuthService();
         ActionListener eventLogin = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                performLogin();
-                  
+                try {
+                    performLogin();
+                } catch (SQLException ex) {
+                    Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
             }
         };
         login = new Login(eventLogin);
+        setPass = new SetNewPassword(eventLogin);
 
         ActionListener eventRegister = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
                 registerForm();
-                slide.show(2);
-                 verify.verify();
+            }
+        };
+        ActionListener eventForget = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                performForget();
             }
         };
         register = new Register(eventRegister);
-       
+        ActionListener eventSetPass = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                performSetNewPassword();
+            }
+        };
+        setPass = new SetNewPassword(eventSetPass);
         slide.setAnimate(10);
-        slide.init(login, register, verify);
+        slide.init(login, register, verify, verifyGm, setPass);
         login.addEventRegister(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -74,6 +102,14 @@ public class LoginFrame extends javax.swing.JFrame {
                 register.register();
             }
         });
+        login.addEventForget(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                slide.show(3);
+
+            }
+        });
+
         register.addEventBackLogin(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -86,24 +122,104 @@ public class LoginFrame extends javax.swing.JFrame {
         verify.addEventRegister(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
+                Users user = register.getUser();
+                if(user != null){
+                userService.deleteUser(user.getUser_id());
                 slide.show(1);
                 register.register();
+                } else {
+                    slide.show(3);
+                }
 
             }
         });
         verify.addEventButtonOK(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                Users user = register.getUser();
-                boolean ok = userService.verifyCodeWithUser(user.getUser_id(), verify.getInputCode());
-                System.out.println(user.getUser_id());
-                
-                if (ok) {
-                    userService.doneVerify(user.getUser_id());
-                    System.out.println("Xác minh thành công");
+                // Nếu đang ở luồng đăng ký (isForget == false), kiểm tra register.getUser()
+                if (!isForget) {
+                    Users user = register.getUser();
+                    if (user == null) {
+                        JOptionPane.showMessageDialog(LoginFrame.this,
+                                "Đang có lỗi, vui lòng thử lại.",
+                                "Lỗi",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    boolean ok = userService.verifyCodeWithUser(
+                            user.getUser_id(),
+                            verify.getInputCode().trim()
+                    );
+                    if (ok) {
+                        userService.doneVerify(user.getUser_id());
+                        System.out.println("Xác minh đăng ký thành công");
+                        login.setTxtUser("");
+                        login.setTxtPass("");
+                        login.setTxtmes("");
+                        slide.show(0);
+                        login.login();
+                    } else {
+                        JOptionPane.showMessageDialog(LoginFrame.this,
+                                "Mã xác minh không đúng.",
+                                "Lỗi",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
                 } else {
-                    System.out.println("Xác minh thất bại");
+                    if (ForgotUser == null) {
+                        JOptionPane.showMessageDialog(LoginFrame.this,
+                                "Đang có lỗi, vui lòng thử lại.",
+                                "Lỗi",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+
+                    }
+                    boolean ok2 = userService.verifyCodeWithUser(
+                            ForgotUser.getUser_id(),
+                            verify.getInputCode().trim()
+                    );
+                    if (ok2) {
+                        userService.doneVerify(ForgotUser.getUser_id());
+                        slide.show(4);  
+                    } else {
+                        JOptionPane.showMessageDialog(LoginFrame.this,
+                                "Mã xác minh không đúng.",
+                                "Lỗi",
+                                JOptionPane.ERROR_MESSAGE);;
+                    }
                 }
+            }
+        });
+
+        verifyGm.addEventButtonOK(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                String email = verifyGm.getEmail().trim();
+                Users user = userService.getUserByEmail(email);
+
+                if (user != null) {
+                    String code = userService.generateVerifyCode();
+                    user.setVerifyCode(code);
+                    athService.sendMain(user);
+                    ForgotUser = user;
+                    userService.UpdateUser(user);
+                    isForget = true;
+
+                    slide.show(2);
+                    verify.verify();
+                } else {
+                    JOptionPane.showMessageDialog(LoginFrame.this,
+                            "Email không tồn tại.",
+                            "Lỗi",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+
+            }
+        });
+        verifyGm.addEventCancel(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                slide.show(0);
+                login.login();
             }
         });
 
@@ -113,25 +229,76 @@ public class LoginFrame extends javax.swing.JFrame {
         performRegister();
     }
 
-    private void performLogin() {
+    private void performLogin() throws SQLException {
 
         String email = login.getTxtUser().getText().trim();
         String password = new String(login.getTxtPass().getPassword()).trim();
-
+        if (email.isEmpty() || password.isEmpty()) {
+            login.setTxtmes("Vui lòng điền đầy đủ thông tin.");
+            return;
+        }
         AuthService authService = new AuthService();
 
         Users user = authService.Login(email, password);
 
         if (user != null) {
+            Main showMain = new Main(user);
 
-            Main showMain = new Main();
             showMain.setVisible(true);
 
             this.dispose();
 
         } else {
+            login.setTxtmes("Sai email hoặc mật khẩu.");
+            return;
+        }
+    }
 
-            javax.swing.JOptionPane.showMessageDialog(this, "Sai email hoặc mật khẩu.", "Đăng nhập thất bại", javax.swing.JOptionPane.ERROR_MESSAGE);
+    private void performSetNewPassword() {
+        String pass = setPass.getNewPassword().trim();
+        String confirm = setPass.getConfirmPassword().trim();
+
+        if (pass.isEmpty() || confirm.isEmpty()) {
+            setPass.setMessage("Vui lòng điền đầy đủ thông tin.");
+            return;
+        }
+        if (!pass.equals(confirm)) {
+            setPass.setMessage("Mật khẩu không khớp.");
+            return;
+        }
+        String salt = PasswordUtils.generateSalt();
+        String hashedPassword = PasswordUtils.hashPassword(confirm, salt);
+
+        // Cập nhật mật khẩu mới cho forgotUser
+        ForgotUser.setPassword(hashedPassword);
+        ForgotUser.setSalt(salt);
+        userService.UpdateUser(ForgotUser);
+
+        JOptionPane.showMessageDialog(this, "Đổi mật khẩu thành công! Mời đăng nhập lại.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+
+        ForgotUser = null;
+
+        login.setTxtUser("");
+        login.setTxtPass("");
+        login.setTxtmes("");
+        slide.show(0);
+        login.login();
+    }
+
+    private void performForget() {
+        String email = verifyGm.getEmail().trim();
+        if (email.isEmpty()) {
+            login.setTxtmes("Vui lòng điền đầy đủ thông tin.");
+            return;
+        }
+        Users user = userService.getUserByEmail(email);
+        if (user != null) {
+            userService.generateVerifyCode();
+            slide.show(2);
+            verify.verify();
+
+        } else {
+
         }
     }
 
@@ -161,7 +328,8 @@ public class LoginFrame extends javax.swing.JFrame {
         try {
             AuthService authService = new AuthService();
             authService.register(name, email, password, "user");
-         
+            slide.show(2);
+            verify.verify();
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Đăng ký thất bại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -179,7 +347,7 @@ public class LoginFrame extends javax.swing.JFrame {
     private void initComponents() {
 
         panelGradiente1 = new com.pbl.swing.PanelGradiente();
-        panelBorder1 = new com.pbl.swing.PanelBorder();
+        panelBorder1 = new com.pbl.swing.PanelBorder2();
         slide = new com.pbl.swing.PanelSlide();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -285,8 +453,9 @@ public class LoginFrame extends javax.swing.JFrame {
         });
     }
 
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private com.pbl.swing.PanelBorder panelBorder1;
+    private com.pbl.swing.PanelBorder2 panelBorder1;
     private com.pbl.swing.PanelGradiente panelGradiente1;
     private com.pbl.swing.PanelSlide slide;
     // End of variables declaration//GEN-END:variables

@@ -9,7 +9,9 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.RoundRectangle2D;
 import javax.swing.JButton;
 import javax.swing.border.EmptyBorder;
 import org.jdesktop.animation.timing.Animator;
@@ -17,6 +19,14 @@ import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.animation.timing.TimingTargetAdapter;
 
 public class Button extends JButton {
+
+    public String getIcoName() {
+        return icoName;
+    }
+
+    public void setIcoName(String icoName) {
+        this.icoName = icoName;
+    }
 
     public Color getEffectColor() {
         return effectColor;
@@ -26,16 +36,17 @@ public class Button extends JButton {
         this.effectColor = effectColor;
     }
 
+    private String icoName;
     private Animator animator;
     private int targetSize;
     private float animatSize;
     private Point pressedPoint;
     private float alpha;
-    private Color effectColor = new Color(173, 173, 173);
+    private Color effectColor = new Color(255, 255, 255);
 
     public Button() {
         setContentAreaFilled(false);
-        setBorder(new EmptyBorder(5, 5, 5, 5));
+        setBorder(new EmptyBorder(5, 10, 5, 10));
         setBackground(Color.WHITE);
         setCursor(new Cursor(Cursor.HAND_CURSOR));
         addMouseListener(new MouseAdapter() {
@@ -67,20 +78,19 @@ public class Button extends JButton {
 
     @Override
     protected void paintComponent(Graphics grphcs) {
-        int width = getWidth();
-        int height = getHeight();
-        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = img.createGraphics();
+        Graphics2D g2 = (Graphics2D) grphcs;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setColor(getBackground());
-        g2.fillRoundRect(0, 0, width, height, height, height);
+        Area area = new Area(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 5, 5));
+        g2.fill(area);
         if (pressedPoint != null) {
             g2.setColor(effectColor);
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, alpha));
-            g2.fillOval((int) (pressedPoint.x - animatSize / 2), (int) (pressedPoint.y - animatSize / 2), (int) animatSize, (int) animatSize);
+            area.intersect(new Area(new Ellipse2D.Double((pressedPoint.x - animatSize / 2), (pressedPoint.y - animatSize / 2), animatSize, animatSize)));
+            g2.fill(area);
         }
-        g2.dispose();
-        grphcs.drawImage(img, 0, 0, null);
+        g2.setComposite(AlphaComposite.SrcOver);
         super.paintComponent(grphcs);
     }
+
 }

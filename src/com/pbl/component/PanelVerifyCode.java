@@ -35,6 +35,7 @@ public class PanelVerifyCode extends javax.swing.JPanel {
     public void addEventOK(ActionListener event){
         cmdOK.addActionListener(event);
     }
+    
    
 
     @SuppressWarnings("unchecked")
@@ -128,7 +129,7 @@ public class PanelVerifyCode extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
-
+        
     }//GEN-LAST:event_cmdCancelActionPerformed
 
     @Override

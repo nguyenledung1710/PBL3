@@ -1,98 +1,76 @@
 package com.pbl.component;
 
-import java.awt.event.ActionListener;
+import com.pbl.swing.PanelBackground;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 public class Header extends javax.swing.JPanel {
 
     public Header() {
         initComponents();
+        setOpaque(false);
     }
 
-    public void addMenuEvent(ActionListener event) {
-        cmdMenu.addActionListener(event);
+    public void initEvent(JFrame fram, PanelBackground panel) {
+        winButton1.initEvent(fram, panel);
+    }
+    private int x;
+    private int y;
+
+    public void initMoving(JFrame fram) {
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent me) {
+              
+                if (fram.getExtendedState() != JFrame.MAXIMIZED_BOTH && SwingUtilities.isLeftMouseButton(me)) {
+                    x = me.getX();
+                    y = me.getY();
+                  
+                }
+            }
+
+        });
+        this.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent me) {
+             
+                if (fram.getExtendedState() != JFrame.MAXIMIZED_BOTH && SwingUtilities.isLeftMouseButton(me)) {
+                   
+                    fram.setLocation(me.getXOnScreen() - x, me.getYOnScreen() - y);
+                    
+                }
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        cmdMenu = new com.pbl.swing.Button();
-        pic = new com.pbl.swing.ImageAvatar();
-        lbUserName = new javax.swing.JLabel();
-        lbRole = new javax.swing.JLabel();
-        jSeparator1 = new javax.swing.JSeparator();
-        buttonBadges1 = new com.pbl.swing.ButtonBadges();
-        buttonBadges2 = new com.pbl.swing.ButtonBadges();
-
-        setBackground(new java.awt.Color(255, 255, 255));
-
-        cmdMenu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/pbl/icon/menu.png"))); // NOI18N
-
-        pic.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/pbl/icon/profile.jpg"))); // NOI18N
-
-        lbUserName.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
-        lbUserName.setForeground(new java.awt.Color(127, 127, 127));
-        lbUserName.setText("User Name");
-
-        lbRole.setForeground(new java.awt.Color(127, 127, 127));
-        lbRole.setText("Admin");
-
-        jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
-
-        buttonBadges1.setForeground(new java.awt.Color(250, 49, 49));
-        buttonBadges1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/pbl/icon/notification.png"))); // NOI18N
-        buttonBadges1.setBadges(12);
-
-        buttonBadges2.setForeground(new java.awt.Color(63, 178, 232));
-        buttonBadges2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/pbl/icon/message.png"))); // NOI18N
-        buttonBadges2.setBadges(5);
+        winButton1 = new com.pbl.swing.win_button.WinButton();
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(cmdMenu, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 362, Short.MAX_VALUE)
-                .addComponent(buttonBadges2, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(3, 3, 3)
-                .addComponent(buttonBadges1, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 8, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lbUserName, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(lbRole, javax.swing.GroupLayout.Alignment.TRAILING))
-                .addGap(18, 18, 18)
-                .addComponent(pic, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(334, Short.MAX_VALUE)
+                .addComponent(winButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(lbUserName)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(lbRole))
-                    .addComponent(cmdMenu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pic, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSeparator1)
-                    .addComponent(buttonBadges1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(buttonBadges2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(winButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private com.pbl.swing.ButtonBadges buttonBadges1;
-    private com.pbl.swing.ButtonBadges buttonBadges2;
-    private com.pbl.swing.Button cmdMenu;
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JLabel lbRole;
-    private javax.swing.JLabel lbUserName;
-    private com.pbl.swing.ImageAvatar pic;
+    private com.pbl.swing.win_button.WinButton winButton1;
     // End of variables declaration//GEN-END:variables
 }
